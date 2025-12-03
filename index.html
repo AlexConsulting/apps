@@ -98,7 +98,7 @@
   <main role="main" aria-label="Painel principal">
     <p class="small">Escreva, fale sobre o que sente ou clique em "Me Ajude" para receber apoio.</p>
     <textarea id="inputText" placeholder="Ex.: Estou me sentindo sem esperança, não sei o que fazer..."></textarea>
-
+    <button class="btn ghost" id="voiceBtn">Falar 🗣️</button>
     <div class="controls">
       <button class="btn primary" id="analyzeBtn">Me Ajude 🙏</button>
       <button class="btn ghost" id="breathBtn">Respiração Guiada</button>
@@ -125,6 +125,35 @@
       <p class="small">CVV (Centro de Valorização da Vida) — Telefone: <b>188</b>. Em casos de emergência, procure o serviço de saúde local.</p>
     </div>
   </main>
+  
+  // Reconhecimento de voz (Web Speech API)
+let recognition;
+if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+
+    recognition.lang = "pt-BR";          // idioma
+    recognition.continuous = false;      // para frases curtas
+    recognition.interimResults = false;  // só envia quando tiver resultado final
+
+    recognition.onresult = function(event) {
+        const texto = event.results[0][0].transcript;
+        document.getElementById("inputText").value = texto;
+    };
+
+    recognition.onerror = function(event) {
+        alert("Não consegui ouvir claramente. Tente novamente.");
+    };
+
+} else {
+    alert("Seu navegador não suporta reconhecimento de voz.");
+}
+
+// botão para iniciar a escuta
+document.getElementById("voiceBtn")?.addEventListener("click", () => {
+    if (recognition) recognition.start();
+});
 
   <!-- Modal: Professionals -->
   <div class="modal" id="modalProf">
