@@ -7,68 +7,280 @@
 <meta name="description" content="MeAjude.com - Acolhimento para pessoas em luto, ansiedade e depressão. Mensagens de apoio, versículos e caminhos para ajuda."/>
 <style>
   :root{
-    --bg1:#f6f9ff; --bg2:#eef6f9; --card:#ffffff;
-    --primary:#4a8df7; --accent:#8e9bf0; --danger:#c0392b;
-    --muted:#6b7280; --rounded:14px;
+    --bg1:#f6f9ff; 
+    --bg2:#eef6f9; 
+    --card:#ffffff;
+    --primary:#4a8df7; 
+    --primary-dark:#3b7ae3;
+    --accent:#8e9bf0; 
+    --danger:#c0392b;
+    --danger-dark:#a83224;
+    --muted:#6b7280; 
+    --rounded:14px;
     --maxw:720px;
   }
+
   *{box-sizing:border-box}
   html,body{height:100%}
+
   body{
-    margin:0; padding:20px; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    margin:0; 
+    padding:20px; 
+    font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     background: linear-gradient(160deg,var(--bg1),var(--bg2));
-    color:#17202a; -webkit-font-smoothing:antialiased;
+    color:#17202a; 
+    -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
-    display:flex; align-items:flex-start; justify-content:center;
+    display:flex; 
+    align-items:flex-start; 
+    justify-content:center;
   }
-  .wrap{width:100%; max-width:var(--maxw);}
+
+  .wrap{
+    width:100%; 
+    max-width:var(--maxw);
+  }
+
   header{
-    display:flex; gap:12px; align-items:center; margin-bottom:14px;
+    display:flex; 
+    gap:12px; 
+    align-items:center; 
+    margin-bottom:14px;
   }
+
   .logo{
-    width:64px; height:64px; background:linear-gradient(180deg,#fff 0%, #f0f8ff 100%);
-    border-radius:14px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(20,40,80,0.08);
+    width:64px; 
+    height:64px; 
+    background:linear-gradient(180deg,#fff 0%, #f0f8ff 100%);
+    border-radius:14px; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
+    box-shadow:0 6px 18px rgba(20,40,80,0.08);
   }
-  .brand h1{margin:0;font-size:18px;} .brand p{margin:0;color:var(--muted); font-size:13px}
-  main{background:var(--card); border-radius:var(--rounded); padding:16px; box-shadow:0 8px 30px rgba(20,40,80,0.06)}
+
+  .brand h1{
+    margin:0;
+    font-size:18px;
+  }
+
+  .brand p{
+    margin:0;
+    color:var(--muted); 
+    font-size:13px;
+  }
+
+  main{
+    background:var(--card); 
+    border-radius:var(--rounded); 
+    padding:16px; 
+    box-shadow:0 8px 30px rgba(20,40,80,0.06)
+  }
+
+  /* Frase inicial */
+  .frase-inicial {
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-align: center;
+    margin: 20px 0;
+    color: #444;
+    padding: 0 20px;
+    line-height: 1.4;
+    animation: fadeIn 1.2s ease;
+  }
+
+  @keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px)}
+    to{opacity:1; transform:translateY(0)}
+  }
+
   textarea{
-    width:100%; min-height:110px; padding:12px; border-radius:10px; border:1px solid #e6eefc;
-    font-size:15px; resize:vertical;
+    width:100%; 
+    min-height:110px; 
+    padding:12px; 
+    border-radius:10px; 
+    border:1px solid #e6eefc;
+    font-size:15px; 
+    resize:vertical;
   }
-  .controls{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap}
+
+  .controls{
+    display:flex; 
+    gap:8px; 
+    margin-top:10px; 
+    flex-wrap:wrap
+  }
+
+  /* BOTÕES ATUALIZADOS */
   button.btn{
-    flex:1 1 auto; padding:12px 14px; border-radius:10px; border:0; font-weight:600;
+    flex:1 1 auto; 
+    padding:12px 14px; 
+    border-radius:10px; 
+    font-weight:600;
     cursor:pointer;
+    border:1px solid transparent;
+    transition:all 0.25s ease;
   }
-  button.primary{background:var(--primary); color:white}
-  button.ghost{background:transparent; border:1px solid #dfe8ff; color:var(--primary)}
-  button.warn{background: #ffecf0; color:var(--danger); border:1px solid rgba(192,57,43,0.08)}
-  .result{margin-top:16px; padding:14px; border-radius:10px; background:linear-gradient(180deg,#fbfcff,#f1f7ff); display:none}
-  .verse{margin-top:8px; font-style:italic; color:#2b477a}
-  .urgent{margin-top:12px; padding:12px; background:#fff6f6; border-left:4px solid var(--danger); color:var(--danger); border-radius:8px; font-weight:700}
-  .small{font-size:13px; color:var(--muted)}
-  .flex-row{display:flex; gap:8px; align-items:center}
-  .actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap}
-  .footer{margin-top:12px; font-size:13px; color:var(--muted)}
+
+  /* Azul padrão */
+  button.primary{
+    background:var(--primary);
+    border:1px solid var(--primary);
+    color:white;
+  }
+  button.primary:hover{
+    background:var(--primary-dark);
+    box-shadow:0 0 10px rgba(74,141,247,0.45);
+    transform: translateY(-2px);
+  }
+
+  /* Azul contornado */
+  button.ghost{
+    background:transparent;
+    border:1px solid var(--primary);
+    color:var(--primary);
+  }
+  button.ghost:hover{
+    background:rgba(74,141,247,0.08);
+    box-shadow:0 0 12px rgba(74,141,247,0.25);
+    transform: translateY(-2px);
+  }
+
+  /* Botão PERIGO leve */
+  button.warn{
+    background:#ffecf0;
+    color:var(--danger);
+    border:1px solid rgba(192,57,43,0.4);
+  }
+  button.warn:hover{
+    background:#ffd6da;
+    box-shadow:0 0 12px rgba(192,57,43,0.45);
+    transform: translateY(-2px);
+  }
+
+  /* Botão PERIGO FORTE */
+  button.danger{
+    background:var(--danger);
+    color:white;
+    border:1px solid var(--danger);
+  }
+  button.danger:hover{
+    background:var(--danger-dark);
+    box-shadow:0 0 14px rgba(192,57,43,0.55);
+    transform: translateY(-2px);
+  }
+
+  /* RESULTADOS */
+  .result{
+    margin-top:16px; 
+    padding:14px; 
+    border-radius:10px; 
+    background:linear-gradient(180deg,#fbfcff,#f1f7ff); 
+    display:none;
+  }
+
+  .verse{
+    margin-top:8px; 
+    font-style:italic; 
+    color:#2b477a
+  }
+
+  .urgent{
+    margin-top:12px; 
+    padding:12px; 
+    background:#fff6f6; 
+    border-left:4px solid var(--danger); 
+    color:var(--danger); 
+    border-radius:8px; 
+    font-weight:700
+  }
+
+  .small{
+    font-size:13px; 
+    color:var(--muted)
+  }
+
+  .flex-row{
+    display:flex; 
+    gap:8px; 
+    align-items:center
+  }
+
+  .actions{
+    display:flex; 
+    gap:8px; 
+    margin-top:12px; 
+    flex-wrap:wrap
+  }
+
+  .footer{
+    margin-top:12px; 
+    font-size:13px; 
+    color:var(--muted)
+  }
+
   /* Modal */
-  .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:1200; background:rgba(6,12,20,0.45)}
-  .modal .card{width:94%; max-width:640px; background:white; padding:16px; border-radius:12px}
-  .close{float:right; cursor:pointer; font-size:20px}
-  /* breathing UI */
-  .breath{
-    width:84px; height:84px; border-radius:999px; display:flex; align-items:center; justify-content:center;
-    margin:12px auto; background:linear-gradient(180deg,#f7fbff,#eef6ff); border:1px solid #e6f0ff;
+  .modal{
+    position:fixed; 
+    inset:0; 
+    display:none; 
+    align-items:center; 
+    justify-content:center; 
+    z-index:1200; 
+    background:rgba(6,12,20,0.45)
   }
-  .hidden{display:none}
-  /* responsive */
+
+  .modal .card{
+    width:94%; 
+    max-width:640px; 
+    background:white; 
+    padding:16px; 
+    border-radius:12px
+  }
+
+  .close{
+    float:right; 
+    cursor:pointer; 
+    font-size:20px
+  }
+
+  /* Respiração guiada */
+  .breath{
+    width:84px; 
+    height:84px; 
+    border-radius:999px; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center;
+    margin:12px auto; 
+    background:linear-gradient(180deg,#f7fbff,#eef6ff); 
+    border:1px solid #e6f0ff;
+  }
+
+  .hidden{
+    display:none
+  }
+
   @media(min-width:720px){
     .controls button{flex:0 0 auto}
   }
-  /* logo svg sizes */
-  .logo svg {width:46px;height:46px}
-  /* professional list */
-  .pro-list{margin-top:10px}
-  .pro-item{padding:10px;border-radius:8px;border:1px solid #f1f6ff;margin-bottom:8px}
+
+  .logo svg {
+    width:46px;
+    height:46px
+  }
+
+  .pro-list{
+    margin-top:10px
+  }
+
+  .pro-item{
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #f1f6ff;
+    margin-bottom:8px
+  }
+
 </style>
 </head>
 <body>
@@ -116,9 +328,9 @@
     </div>
 
     <div class="actions">
-      <button class="btn" id="susBtn">Busque Ajuda (SUS)</button>
-      <button class="btn" id="professionalsBtn">Profissionais de Saúde</button>
-      <button class="btn" id="dangerBtn" style="background:#ff6b6b;color:white">Estou em perigo agora</button>
+     <button class="btn primary" id="susBtn">Busque Ajuda (SUS)</button>
+    <button class="btn primary" id="professionalsBtn">Profissionais de Saúde</button>
+    <button class="btn danger" id="dangerBtn">Estou em perigo agora</button>
     </div>
 
     <div class="footer">
