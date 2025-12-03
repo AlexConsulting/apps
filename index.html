@@ -594,3 +594,43 @@ window.addEventListener('load', ()=>{
 // ---------- Observação final: nada aqui substitui ajuda profissional ----------
 /* Nota: este protótipo foi feito para acolhimento e indicação de ajuda. Não substitui avaliação clínica. */
 </script>
+<script>
+
+// … aqui ficam as outras funções e lógicas que você já tem …
+
+// ===========================================
+//  FUNÇÃO DE RECONHECIMENTO DE VOZ
+// ===========================================
+let recognition;
+
+if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+
+    recognition.lang = "pt-BR";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = function(event) {
+        const texto = event.results[0][0].transcript;
+        document.getElementById("inputText").value = texto;
+    };
+
+    recognition.onerror = function(event) {
+        alert("Não consegui ouvir claramente. Tente novamente.");
+    };
+
+} else {
+    alert("Seu navegador não suporta reconhecimento de voz.");
+}
+
+// botão para iniciar
+document.getElementById("voiceBtn")?.addEventListener("click", () => {
+    if (recognition) recognition.start();
+});
+
+</script>
+</body>
+</html>
+
