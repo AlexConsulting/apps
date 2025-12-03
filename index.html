@@ -126,35 +126,7 @@
     </div>
   </main>
   
-  // Reconhecimento de voz (Web Speech API)
-let recognition;
-if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-    
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-
-    recognition.lang = "pt-BR";          // idioma
-    recognition.continuous = false;      // para frases curtas
-    recognition.interimResults = false;  // só envia quando tiver resultado final
-
-    recognition.onresult = function(event) {
-        const texto = event.results[0][0].transcript;
-        document.getElementById("inputText").value = texto;
-    };
-
-    recognition.onerror = function(event) {
-        alert("Não consegui ouvir claramente. Tente novamente.");
-    };
-
-} else {
-    alert("Seu navegador não suporta reconhecimento de voz.");
-}
-
-// botão para iniciar a escuta
-document.getElementById("voiceBtn")?.addEventListener("click", () => {
-    if (recognition) recognition.start();
-});
-
+  
   <!-- Modal: Professionals -->
   <div class="modal" id="modalProf">
     <div class="card" role="dialog" aria-modal="true" aria-labelledby="proTitle">
