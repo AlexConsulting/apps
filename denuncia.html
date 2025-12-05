@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.O.S. Apoio | Protótipo</title>
+    <!-- Carrega o Tailwind CSS para o estilo responsivo e moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define a fonte Inter e aplica um tema escuro padrão para discrição */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        :root {
+            --red-emergency: #e3342f; /* Vermelho vibrante */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212; /* Fundo escuro */
+            color: #e0e0e0; /* Texto claro */
+        }
+        .emergency-button {
+            width: 180px;
+            height: 180px;
+            background-color: var(--red-emergency);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(227, 52, 47, 0.8), 0 0 40px rgba(227, 52, 47, 0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 8px solid rgba(255, 255, 255, 0.1);
+            animation: pulse 2s infinite;
+        }
+        .emergency-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 10px rgba(227, 52, 47, 0.9);
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(227, 52, 47, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(227, 52, 47, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(227, 52, 47, 0); }
+        }
+        .modal {
+            background-color: #1e1e1e;
+        }
+    </style>
+    <!-- Ícone de seta para Saída Rápida -->
+    <svg style="display: none;">
+        <symbol id="icon-exit" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M16 13H5v-2h11V4l5 5-5 5zM12 21h7a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-7v2h7v14h-7z"/>
+        </symbol>
+    </svg>
+</head>
+<body class="h-screen flex flex-col">
+
+    <!-- Botão de Saída Rápida (Panic Button) -->
+    <button id="quickExitBtn" class="absolute top-4 left-4 p-2 rounded-full bg-gray-700 text-white shadow-xl z-50 transition-colors hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-500">
+        <svg class="w-6 h-6" fill="currentColor"><use xlink:href="#icon-exit"></use></svg>
+        <span class="sr-only">Sair Rápido</span>
+    </button>
+
+    <!-- Cabeçalho (Fixo no Topo) -->
+    <header class="p-4 bg-gray-800 shadow-lg flex justify-between items-center z-10">
+        <h1 class="text-xl font-bold text-gray-100">S.O.S. Apoio</h1>
+        <div class="flex space-x-2">
+            <!-- Botão Denuncie Aqui -->
+            <button id="btnDenuncia" class="px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-semibold hover:bg-blue-700 transition-colors shadow-md">
+                Denuncie Aqui
+            </button>
+            <!-- NOVO BOTÃO: Minhas Denúncias / Estatísticas -->
+            <button id="btnStats" class="px-4 py-2 bg-purple-600 text-white rounded-full text-sm font-semibold hover:bg-purple-700 transition-colors shadow-md">
+                Minhas Denúncias
+            </button>
+            <!-- Botão Ajuda/Orientação -->
+            <button id="btnAjuda" class="px-4 py-2 bg-gray-600 text-white rounded-full text-sm font-semibold hover:bg-gray-700 transition-colors shadow-md">
+                Ajuda
+            </button>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal (Tela de Emergência Padrão) -->
+    <main id="mainScreen" class="flex-grow flex flex-col items-center justify-center p-4">
+        <div class="text-center mb-10">
+            <h2 class="text-2xl font-bold mb-2">Emergência Imediata</h2>
+            <p class="text-gray-400">Pressione e segure para ligar para a Polícia (190).</p>
+        </div>
+        
+        <!-- Botão Vermelho Central de Emergência -->
+        <a id="emergencyBtn" href="tel:190" class="emergency-button mb-8">
+            <span class="text-5xl font-extrabold text-white">190</span>
+            <span class="text-lg font-bold text-white mt-1">EMERGÊNCIA</span>
+        </a>
+
+        <!-- Mensagem de Confirmação (será exibida após o envio da denúncia) -->
+        <div id="statusMessage" class="hidden p-4 mt-8 max-w-sm bg-green-800 rounded-lg shadow-2xl text-center" role="alert">
+            <p class="font-semibold text-lg">Denúncia Enviada!</p>
+            <p class="text-sm">Agradecemos sua colaboração. Sua denúncia será utilizada para fins estatísticos e mapeamento.</p>
+        </div>
+    </main>
+
+    <!-- Formulário de Denúncia (Inicialmente Oculto) -->
+    <div id="reportFormContainer" class="hidden absolute inset-0 bg-gray-900 bg-opacity-95 overflow-y-auto p-6 z-20">
+        <div class="max-w-xl mx-auto bg-gray-800 rounded-xl p-6 shadow-2xl">
+            <h2 class="text-2xl font-bold text-red-400 mb-4">Denuncie Aqui</h2>
+            <p class="text-sm text-gray-400 mb-6 border-b border-gray-700 pb-4">
+                <span class="font-bold text-yellow-400">SIGILO ABSOLUTO:</span> Esta denúncia é coletada para fins estatísticos e de mapeamento. Os campos pessoais são opcionais, e a descrição é sigilosa.
+            </p>
+
+            <form id="denunciaForm" class="space-y-4">
+                <!-- Opção Anônima -->
+                <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                    <label for="anonimo" class="text-lg font-semibold text-white">Denúncia Anônima?</label>
+                    <input type="checkbox" id="anonimo" name="anonimo" class="form-checkbox h-5 w-5 text-red-500 rounded focus:ring-red-500 transition duration-150 ease-in-out bg-gray-900 border-gray-600">
+                </div>
+
+                <!-- Nome (Opcional) -->
+                <div id="nomeField">
+                    <label for="nome" class="block text-sm font-medium text-gray-400">Nome do Denunciante (Opcional)</label>
+                    <input type="text" id="nome" name="nome" class="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:border-red-500 focus:ring-red-500 text-white">
+                </div>
+                
+                <!-- Gênero e Idade -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="sexo" class="block text-sm font-medium text-gray-400">Sexo da Vítima (Estatístico)</label>
+                        <select id="sexo" name="sexo" required class="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:border-red-500 focus:ring-red-500 text-white">
+                            <option value="" disabled selected>Selecione</option>
+                            <option value="Feminino">Feminino</option>
+                            <option value="Masculino">Masculino</option>
+                           
+                        </select>
+                    </div>
+                    <div>
+                        <label for="idade" class="block text-sm font-medium text-gray-400">Idade da Vítima (Estatístico)</label>
+                        <input type="number" id="idade" name="idade" min="0" required class="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:border-red-500 focus:ring-red-500 text-white">
+                    </div>
+                </div>
+
+                <!-- Geolocation Status -->
+                <div id="geoStatus" class="p-3 bg-blue-900 text-blue-300 rounded-lg text-sm hidden">
+                    Localização obtida: Latitude/Longitude registradas para mapeamento.
+                </div>
+                
+                <!-- Campos Ocultos para Geocoordenadas de Alta Precisão -->
+                <input type="hidden" id="latitude" name="latitude" value="">
+                <input type="hidden" id="longitude" name="longitude" value="">
+
+                <!-- Bairro e Localização (Para Mapeamento) -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-3 sm:col-span-1">
+                        <label for="estado" class="block text-sm font-medium text-gray-400">Estado</label>
+                        <input type="text" id="estado" name="estado" required class="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:border-red-500 focus:ring-red-500 text-white" placeholder="Ex: SP">
+                    </div>
+                    <div class="col-span-3 sm:col-span-2">
+                        <label for="municipio" class="block text-sm font-medium text-gray-400">Município</label>
+                        <input type="text" id="municipio" name="municipio" required class="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:border-red-500 focus:ring-red-500 text-white" placeholder="Ex: São Paulo">
+                    </div>
+                </div>
+                <div>
+                    <label for="bairro" class="block text-sm font-medium text-gray-400">Bairro (Para Mapeamento)</label>
+                    <input type="text" id="bairro" name="bairro" class="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:border-red-500 focus:ring-red-500 text-white" placeholder="Ex: Centro">
+                </div>
+
+                <!-- Campo de Descrição da Denúncia -->
+                <div>
+                    <label for="descricao" class="block text-sm font-medium text-gray-400">Descrição da Denúncia (O mais detalhado possível)</label>
+                    <textarea id="descricao" name="descricao" rows="6" required class="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:border-red-500 focus:ring-red-500 text-white"></textarea>
+                </div>
+
+                <div id="formStatus" class="mt-4 text-center hidden p-2 rounded-md bg-yellow-900 text-yellow-300">Aguarde... Enviando denúncia.</div>
+                
+                <div class="flex justify-between pt-4">
+                    <button type="button" id="cancelDenuncia" class="px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors shadow-md">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="submitDenuncia" class="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors shadow-xl">
+                        Enviar Denúncia
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Ajuda e Orientação (Inicialmente Oculto) -->
+    <div id="helpModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-95 overflow-y-auto p-6 z-30">
+        <div class="max-w-xl mx-auto modal rounded-xl p-6 shadow-2xl">
+            <h2 class="text-3xl font-bold text-red-500 mb-6 border-b border-gray-700 pb-2">Ajuda e Orientação</h2>
+            <p class="text-gray-300 mb-6">Informações vitais sobre como buscar apoio e proteção. Lembre-se, você não está sozinha(o).</p>
+
+            <!-- Categorias de Ajuda -->
+            <div class="space-y-6">
+                
+                <!-- 1. Emergência e Polícia -->
+                <div class="bg-gray-700 p-4 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-yellow-400 mb-2">Emergência Imediata</h3>
+                    <p class="text-sm text-gray-300 mb-2">Acione estes números em caso de perigo imediato ou flagrante.</p>
+                    <ul class="list-disc list-inside text-gray-200 space-y-1 ml-4">
+                        <li>**190 - Polícia Militar:** Violência em andamento.</li>
+                        <li>**197 - Polícia Civil:** Denúncia de crimes (não urgentes).</li>
+                    </ul>
+                </div>
+
+                <!-- 2. Apoio Especializado e Denúncia -->
+                <div class="bg-gray-700 p-4 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-blue-400 mb-2">Apoio Especializado</h3>
+                    <p class="text-sm text-gray-300 mb-2">Órgãos focados em acolhimento e investigação de violência.</p>
+                    <ul class="list-disc list-inside text-gray-200 space-y-1 ml-4">
+                        <li>**Delegacia da Mulher (DEAM):** Para vítimas do sexo feminino.</li>
+                        <li>**Disque 100 (Direitos Humanos):** Denúncias de violência contra crianças, adolescentes, idosos e PCD.</li>
+                        <li>**Conselho Tutelar:** Maus tratos ou negligência envolvendo crianças e adolescentes.</li>
+                        <li>**CREAS:** Centro de Referência Especializado de Assistência Social.</li>
+                    </ul>
+                </div>
+
+                <!-- 3. Apoio Legal e Jurídico -->
+                <div class="bg-gray-700 p-4 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-green-400 mb-2">Amparo Legal</h3>
+                    <p class="text-sm text-gray-300 mb-2">Busca por medidas protetivas e orientação jurídica gratuita.</p>
+                    <ul class="list-disc list-inside text-gray-200 space-y-1 ml-4">
+                        <li>**Defensoria Pública:** Para assistência jurídica gratuita (Lei Maria da Penha, guarda, etc.).</li>
+                        <li>**OAB (Comissões):** Muitas seccionais oferecem auxílio em casos de violência.</li>
+                    </ul>
+                </div>
+
+                <!-- 4. Ajuda Emocional -->
+                <div class="bg-gray-700 p-4 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-pink-400 mb-2">Ajuda Emocional</h3>
+                    <p class="text-sm text-gray-300 mb-2">Recursos para lidar com o trauma e o sofrimento emocional.</p>
+                    <ul class="list-disc list-inside text-gray-200 space-y-1 ml-4">
+                        <li>**CVV (Centro de Valorização da Vida) - Ligue 188:** Conversa confidencial 24h.</li>
+                        <li>**Rede de Psicólogos Voluntários:** Procure por grupos de apoio em seu município.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Botão de Fechar -->
+            <button id="closeHelpModal" class="mt-8 w-full py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors shadow-xl">
+                Entendi, Fechar
+            </button>
+        </div>
+    </div>
+
+    <!-- NOVO MODAL: Modal de Estatísticas e Listagem de Denúncias (Inicialmente Oculto) -->
+    <div id="statsModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-95 overflow-y-auto p-6 z-30">
+        <div class="max-w-3xl mx-auto modal rounded-xl p-6 shadow-2xl">
+            <h2 class="text-3xl font-bold text-purple-400 mb-6 border-b border-gray-700 pb-2">Minhas Denúncias Salvas</h2>
+            <p class="text-gray-300 mb-4">Abaixo estão as denúncias que você registrou para fins estatísticos. Elas estão salvas de forma privada, associadas ao seu usuário.</p>
+            
+            <div id="statsList" class="space-y-4">
+                <p class="text-center text-gray-500 mt-8">Carregando denúncias...</p>
+            </div>
+
+            <button id="closeStatsModal" class="mt-8 w-full py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-xl">
+                Fechar
+            </button>
+        </div>
+    </div>
+
+    <!-- Script para Firebase e Lógica do Aplicativo -->
+    <script type="module">
+        // Importações MANDATÓRIAS do Firebase (usando módulos)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // Adicionadas onSnapshot e query para leitura de dados em tempo real
+        import { getFirestore, collection, addDoc, setLogLevel, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Configurações e Variáveis Globais (MANDATÓRIAS do ambiente Canvas)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth;
+        let userId = null;
+        let isAuthReady = false;
+        let currentUnsubscribe = null; // Variável para armazenar a função de desinscrição do listener
+
+        // Referências DOM
+        const btnDenuncia = document.getElementById('btnDenuncia');
+        const btnAjuda = document.getElementById('btnAjuda');
+        const btnStats = document.getElementById('btnStats'); // NOVO: Botão de Estatísticas
+        const mainScreen = document.getElementById('mainScreen');
+        const reportFormContainer = document.getElementById('reportFormContainer');
+        const helpModal = document.getElementById('helpModal');
+        const statsModal = document.getElementById('statsModal'); // NOVO: Modal de Estatísticas
+        const statsList = document.getElementById('statsList'); // NOVO: Lista de Denúncias
+        const closeStatsModal = document.getElementById('closeStatsModal'); // NOVO: Botão de fechar do modal de stats
+        const denunciaForm = document.getElementById('denunciaForm');
+        const nomeField = document.getElementById('nomeField');
+        const anonimoCheckbox = document.getElementById('anonimo');
+        const cancelDenuncia = document.getElementById('cancelDenuncia');
+        const closeHelpModal = document.getElementById('closeHelpModal');
+        const statusMessage = document.getElementById('statusMessage');
+        const quickExitBtn = document.getElementById('quickExitBtn');
+        const formStatus = document.getElementById('formStatus');
+
+        // Campos de Geocoordenadas
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
+        const geoStatusDiv = document.getElementById('geoStatus');
+
+        // Configuração do Firebase
+        async function setupFirebase() {
+            try {
+                // Configura o nível de log para debug (necessário para Firestore)
+                setLogLevel('Debug');
+                
+                // Inicializa o app Firebase
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Autenticação
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Listener de Estado de Autenticação (IMPORTANTE para garantir o userId)
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Firebase Auth OK. User ID:", userId);
+                    } else {
+                        userId = null;
+                        console.log("Usuário deslogado ou anônimo.");
+                    }
+                    isAuthReady = true;
+                });
+            } catch (error) {
+                console.error("Erro ao configurar o Firebase:", error);
+            }
+        }
+
+        // Função para Obter Geolocalização
+        function getGeolocation() {
+            if ("geolocation" in navigator) {
+                geoStatusDiv.textContent = "Tentando obter sua localização para mapeamento...";
+                geoStatusDiv.classList.remove('hidden');
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+
+                        latitudeInput.value = lat;
+                        longitudeInput.value = lon;
+                        
+                        console.log(`Geolocalização obtida: Lat=${lat}, Lon=${lon}`);
+                        geoStatusDiv.textContent = "Localização obtida: Latitude/Longitude registradas para mapeamento.";
+                        geoStatusDiv.classList.remove('bg-red-900');
+                        geoStatusDiv.classList.add('bg-blue-900');
+
+                        // NOTA IMPORTANTE: Em um ambiente de produção, aqui seria feita
+                        // uma chamada AJAX (Reverse Geocoding API) para preencher os
+                        // campos 'municipio' e 'estado' automaticamente.
+                    },
+                    (error) => {
+                        console.warn('Erro ao obter geolocalização:', error.message);
+                        latitudeInput.value = '';
+                        longitudeInput.value = '';
+                        geoStatusDiv.textContent = "Não foi possível obter a localização. Preencha o Estado e Município manualmente.";
+                        geoStatusDiv.classList.remove('bg-blue-900');
+                        geoStatusDiv.classList.add('bg-red-900');
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                console.log("Geolocalização não é suportada por este navegador.");
+                geoStatusDiv.textContent = "Geolocalização não suportada. Preencha todos os campos de endereço.";
+                geoStatusDiv.classList.remove('hidden');
+                geoStatusDiv.classList.add('bg-red-900');
+            }
+        }
+
+        // Função para buscar e exibir as denúncias em tempo real
+        function fetchReports() {
+            // Garante que a autenticação esteja pronta
+            if (!isAuthReady || !userId) {
+                statsList.innerHTML = `<p class="text-center text-red-500 mt-8">Erro de autenticação. Tente novamente.</p>`;
+                return;
+            }
+
+            const collectionPath = `artifacts/${appId}/users/${userId}/denuncias_estatisticas`;
+            // Cria uma query para buscar todos os documentos do usuário
+            const reportsQuery = query(collection(db, collectionPath));
+
+            // Usa onSnapshot para escutar em tempo real
+            const unsubscribe = onSnapshot(reportsQuery, (snapshot) => {
+                if (snapshot.empty) {
+                    statsList.innerHTML = `<p class="text-center text-gray-500 mt-8">Nenhuma denúncia encontrada ainda.</p>`;
+                    return;
+                }
+
+                let htmlContent = '';
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    const date = new Date(data.timestamp).toLocaleString('pt-BR');
+                    
+                    htmlContent += `
+                        <div class="bg-gray-700 p-4 rounded-lg shadow-xl border-l-4 border-purple-500">
+                            <p class="text-xs text-gray-400 mb-1">ID da Denúncia: ${doc.id.substring(0, 8)}... | Data: ${date}</p>
+                            <h4 class="text-lg font-semibold text-white mb-2">${data.anonimo ? 'Denúncia Anônima' : data.nomeDenunciante}</h4>
+                            <p class="text-sm text-gray-300"><strong>Local:</strong> ${data.bairro}, ${data.municipio} - ${data.estado} (Lat/Lon: ${data.latitude}/${data.longitude})</p>
+                            <p class="text-sm text-gray-300"><strong>Vítima:</strong> ${data.sexo}, ${data.idade} anos.</p>
+                            <p class="mt-3 text-sm italic text-gray-200 border-t border-gray-600 pt-2">${data.descricao}</p>
+                        </div>
+                    `;
+                });
+
+                statsList.innerHTML = htmlContent;
+            }, (error) => {
+                console.error("Erro ao carregar denúncias:", error);
+                statsList.innerHTML = `<p class="text-center text-red-500 mt-8">Erro ao carregar dados: ${error.message}</p>`;
+            });
+
+            return unsubscribe; // Retorna a função de unsubscribe
+        }
+
+
+        // Funções de Gerenciamento de Visualização
+        function showScreen(screen) {
+            // Se houver um listener ativo, desativa antes de trocar de tela
+            if (currentUnsubscribe) {
+                currentUnsubscribe();
+                currentUnsubscribe = null;
+            }
+
+            mainScreen.classList.add('hidden');
+            reportFormContainer.classList.add('hidden');
+            helpModal.classList.add('hidden');
+            statsModal.classList.add('hidden'); // Oculta o novo modal
+            statusMessage.classList.add('hidden'); // Oculta a mensagem de status sempre que a tela principal é trocada
+            geoStatusDiv.classList.add('hidden'); // Oculta o status da geo ao sair do form
+
+            if (screen === 'main') {
+                mainScreen.classList.remove('hidden');
+            } else if (screen === 'report') {
+                reportFormContainer.classList.remove('hidden');
+                getGeolocation(); // Tenta obter a localização ao abrir o formulário
+            } else if (screen === 'help') {
+                helpModal.classList.remove('hidden');
+            } else if (screen === 'stats') { // NOVO: Tela de Estatísticas
+                statsModal.classList.remove('hidden');
+                currentUnsubscribe = fetchReports(); // Ativa o listener e armazena a função de desinscrição
+            }
+        }
+
+        // Lógica de Envio da Denúncia
+        async function submitDenuncia(event) {
+            event.preventDefault();
+            
+            if (!isAuthReady || !userId) {
+                console.error("Sistema não pronto. Tente novamente.");
+                formStatus.textContent = "Erro de conexão. Tente novamente.";
+                formStatus.classList.remove('hidden');
+                formStatus.classList.add('bg-red-900', 'text-red-300');
+                return;
+            }
+
+            formStatus.textContent = "Aguarde... Enviando denúncia.";
+            formStatus.classList.remove('hidden', 'bg-red-900', 'text-red-300');
+            formStatus.classList.add('bg-yellow-900', 'text-yellow-300');
+            
+            const formData = new FormData(denunciaForm);
+            const data = {
+                // Dados Estáticos para Mapeamento
+                sexo: formData.get('sexo'),
+                idade: parseInt(formData.get('idade'), 10) || null,
+                bairro: formData.get('bairro') || 'N/A',
+                municipio: formData.get('municipio'),
+                estado: formData.get('estado'),
+                descricao: formData.get('descricao'), // Conteúdo Sigiloso
+
+                // Dados de Geolocalização (de alta precisão)
+                latitude: formData.get('latitude') || 'N/A',
+                longitude: formData.get('longitude') || 'N/A',
+
+                // Metadados do App e Denúncia
+                anonimo: anonimoCheckbox.checked,
+                nomeDenunciante: anonimoCheckbox.checked ? 'Denunciante Anônimo' : (formData.get('nome') || 'Não Informado'),
+                timestamp: new Date().toISOString(),
+                appId: appId,
+                userId: userId,
+            };
+
+            // Define o caminho da coleção (privada por padrão, ligada ao userId)
+            const collectionPath = `artifacts/${appId}/users/${userId}/denuncias_estatisticas`;
+
+            try {
+                // Tentativa de envio com exponencial backoff
+                const maxRetries = 3;
+                for (let i = 0; i < maxRetries; i++) {
+                    try {
+                        await addDoc(collection(db, collectionPath), data);
+                        break; // Sucesso, sai do loop
+                    } catch (e) {
+                        if (i === maxRetries - 1) throw e; // Se for a última tentativa, propaga o erro
+                        const delay = Math.pow(2, i) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+                
+                denunciaForm.reset();
+                showScreen('main');
+                statusMessage.classList.remove('hidden'); // Mostra a mensagem de sucesso
+                setTimeout(() => statusMessage.classList.add('hidden'), 5000); // Esconde após 5 segundos
+
+            } catch (error) {
+                console.error("Erro ao enviar a denúncia:", error);
+                formStatus.textContent = "ERRO: Não foi possível enviar a denúncia. Verifique sua conexão.";
+                formStatus.classList.remove('bg-yellow-900', 'text-yellow-300');
+                formStatus.classList.add('bg-red-900', 'text-red-300');
+            } finally {
+                formStatus.classList.add('hidden');
+            }
+        }
+
+        // Lógica de Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            setupFirebase();
+
+            // Alternar anonimato (oculta/exibe o campo Nome)
+            anonimoCheckbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    nomeField.classList.add('hidden');
+                    document.getElementById('nome').required = false;
+                } else {
+                    nomeField.classList.remove('hidden');
+                    document.getElementById('nome').required = false; // Tornamos sempre opcional
+                }
+            });
+
+            // Botões de navegação
+            btnDenuncia.addEventListener('click', () => showScreen('report'));
+            cancelDenuncia.addEventListener('click', () => showScreen('main'));
+            btnAjuda.addEventListener('click', () => showScreen('help'));
+            closeHelpModal.addEventListener('click', () => showScreen('main'));
+
+            // NOVO: Botões de navegação para a tela de Estatísticas
+            btnStats.addEventListener('click', () => showScreen('stats'));
+            closeStatsModal.addEventListener('click', () => showScreen('main'));
+
+            // Botão de Saída Rápida (Sair Rápido)
+            quickExitBtn.addEventListener('click', () => {
+                // Redireciona para um site neutro (Ex: Google)
+                window.location.href = 'https://www.google.com/search?q=previs%C3%A3o+do+tempo';
+            });
+
+            // Submissão do Formulário
+            denunciaForm.addEventListener('submit', submitDenuncia);
+        });
+
+    </script>
+
+</body>
+</html>
